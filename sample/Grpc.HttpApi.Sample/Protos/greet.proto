@@ -1,0 +1,78 @@
+syntax = "proto3";
+
+option csharp_namespace = "Grpc.HttpApi.Sample";
+
+package greet;
+
+
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/any.proto";
+
+import public "annotations.proto";
+
+
+
+// The greeting service definition.
+service HttpApiGreeterService {
+
+  //greeter hello
+  rpc SayHello (HelloRequest) returns (HelloReply){	
+	option (grpc.extensions.http_api_option) = {
+			path : "/api/greeter/{name}",
+			method : "get",
+			description : "greeter hello"
+			
+	};
+  };
+
+  //gPostTest
+  rpc PostTest (HelloRequest) returns (HelloReply){	
+    option (grpc.extensions.http_api_option) = {
+		    path : "/api/greeter",
+		    method : "post",
+		    description : "post greeter hello"			
+    };
+  };
+  //NoOption
+  rpc NoOption (HelloRequest) returns (HelloReply);
+}
+
+
+// The request message containing the user's name.
+message HelloRequest {
+    enum NestedEnum {
+      NESTED_ENUM_UNSPECIFIED = 0;
+      FOO = 1;
+      BAR = 2;
+      BAZ = 3;
+      NEG = -1;  // Intentionally negative.
+    }
+
+    int32 single_int32 = 1; //comment single_int32
+    int64 single_int64 = 2;  //comment single_int64
+    uint32 single_uint32 = 3;  //comment single_uint32
+    uint64 single_uint64 = 4;  //comment single_uint64
+    sint32 single_sint32 = 5;  //comment single_sint32
+    sint64 single_sint64 = 6;  //comment single_sint64
+    fixed32 single_fixed32 = 7;  //comment single_fixed32
+    fixed64 single_fixed64 = 8;  //comment single_fixed64
+    sfixed32 single_sfixed32 = 9;  //comment single_sfixed32
+    sfixed64 single_sfixed64 = 10; //comment single_sfixed64
+    float single_float = 11;  //comment single_float
+    double single_double = 12;  //comment single_double
+    bool single_bool = 13;  //comment single_bool
+    string single_string = 14;  //comment single_string
+    bytes single_bytes = 15;  //comment single_bytes
+    NestedEnum single_enum = 16; //comment single_enum
+
+    string name =20; //comment name
+    
+}
+
+// The response message containing the greetings.
+message HelloReply {
+  string message = 1; //comment message
+  repeated string values = 2; //comment values
+  google.protobuf.StringValue nullable_message = 3; //comment nullable_message
+  google.protobuf.Any any_message = 4; //comment any_message
+}

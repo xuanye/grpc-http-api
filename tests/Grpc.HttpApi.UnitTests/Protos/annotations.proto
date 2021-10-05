@@ -1,0 +1,25 @@
+
+// [START declaration]
+syntax = "proto3";
+package grpc.extensions;
+// [END declaration]
+
+// [START csharp_declaration]
+option csharp_namespace = "Grpc.HttpApi";
+// [END csharp_declaration]
+
+import "google/protobuf/descriptor.proto";
+
+
+extend google.protobuf.MethodOptions {
+  HttpApiOption http_api_option = 51003;  //http api option 
+}
+
+message HttpApiOption {
+  string path        = 1 ;  //pattern
+  string method      = 2 ;  //request one of method get/post/put/patch/delete
+  string description = 3 ;  //description
+  string plugin      = 4 ;  //http api plugin class full name
+  string category    = 5 ;   //api category
+  string version     = 6 ;   //api version,default v1
+}
