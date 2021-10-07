@@ -2,16 +2,12 @@
 // Licensed under the Apache License, Version 2.0. See License.txt in the project root for license information.
 
 using Grpc.HttpApi.Swagger;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using Swashbuckle.AspNetCore.SwaggerGen;
 using System;
 using System.Collections.Generic;
-using System.Text.Json;
 
 namespace Microsoft.Extensions.DependencyInjection
 {
@@ -46,14 +42,7 @@ namespace Microsoft.Extensions.DependencyInjection
                     actionDescriptorCollectionProvider ?? new EmptyActionDescriptorCollectionProvider(),
                     apiDescriptionProvider);
             });
-
-            // Add or replace contract resolver.
-            services.Replace(ServiceDescriptor.Transient<ISerializerDataContractResolver>(s =>
-            {
-                var serializerOptions = s.GetService<IOptions<JsonOptions>>()?.Value?.JsonSerializerOptions ?? new JsonSerializerOptions();
-                var innerContractResolver = new JsonSerializerDataContractResolver(serializerOptions);
-                return new GrpcDataContractResolver(innerContractResolver);
-            }));
+            
 
             return services;
         }

@@ -12,7 +12,6 @@
     </PackageReference>
     <PackageReference Include="Microsoft.AspNetCore" Version="2.2.0" />
     <PackageReference Include="Microsoft.OpenApi" Version="1.2.3" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.2.2" />  
   </ItemGroup>
   <ItemGroup>
     <Protobuf Include="Protos\**\*.proto" ProtoRoot="Protos" GrpcServices="Both" />

@@ -135,21 +135,7 @@ namespace Grpc.HttpApi.Swagger
                         IsRequired = field.IsRequired
                     });
                 }
-            }
-            //TODO: Add form and query Parameter
-
-            /*
-            ServiceDescriptorHelpers.ResolveBodyDescriptor(httpRule.Body, methodDescriptor, out var bodyDescriptor, out _, out _);
-            if (bodyDescriptor != null)
-            {
-                apiDescription.ParameterDescriptions.Add(new ApiParameterDescription
-                {
-                    Name = "Input",
-                    ModelMetadata = new GrpcModelMetadata(ModelMetadataIdentity.ForType(bodyDescriptor.ClrType)),
-                    Source = BindingSource.Body
-                });
-            }
-            */
+            }          
 
             return apiDescription;
         }
