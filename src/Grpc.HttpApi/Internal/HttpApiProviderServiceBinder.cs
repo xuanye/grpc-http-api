@@ -161,7 +161,7 @@ namespace Grpc.HttpApi.Internal
 
             // Add protobuf service method descriptor.
             // Is used by swagger generation to identify gRPC HTTP APIs.
-            metadata.Add(new GrpcHttpMetadata(methodDescriptor, httpApiOption));
+            metadata.Add(new GrpcHttpMetadata(handlerMethod, methodDescriptor, httpApiOption));
 
             return (invoker, metadata);
         }

@@ -1,8 +1,5 @@
-﻿using FluentAssertions;
-using Grpc.HttpApi.Implements;
+﻿using Grpc.HttpApi.Implements;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using Xunit;
 
 namespace Grpc.HttpApi.UnitTests
@@ -21,8 +18,9 @@ namespace Grpc.HttpApi.UnitTests
             var json = parser.ToJson(reply);
 
             //assert
-            json.Should().NotBeNullOrEmpty()
-                .And.Equals("{ \"message\":\"hello\" }");
+            Assert.NotNull(json);
+            Assert.NotEmpty(json);
+            Assert.Equal("{ \"message\": \"hello\" }", json);
         }
 
         [Fact]
@@ -37,8 +35,10 @@ namespace Grpc.HttpApi.UnitTests
             var json = parser.ToJson(reply);
 
             //assert
-            json.Should().NotBeNullOrEmpty()
-                .And.Equals("{ }");
+            Assert.NotNull(json);
+            Assert.NotEmpty(json);
+            Assert.Equal("{ }", json);
+           
         }
 
         [Fact]
@@ -53,7 +53,7 @@ namespace Grpc.HttpApi.UnitTests
             var json = parser.ToJson(testObject);
 
             //assert
-            json.Should().BeNull();
+            Assert.Null(json); 
         }
         [Fact]
         public void ToJson_ObjectType_ShouldBeSuccess()
@@ -66,16 +66,19 @@ namespace Grpc.HttpApi.UnitTests
                 Message = lorem.Sentence(),
                 NullableMessage = null
             };
-            reply.Values.AddRange(lorem.Sentences(10).Split("\n"));
+            reply.ListMessage.AddRange(lorem.Sentences(10).Split("\n"));
             var orginJson = parser.ToJson(reply);
-            object testObj = System.Text.Json.JsonSerializer.Deserialize(orginJson, typeof(HelloReply));
+
+            
+            object testObj = parser.FromJson(orginJson, typeof(HelloReply)) ;
 
             //act 
 
             var actJson = parser.ToJson(testObj);
 
             //assert
-            actJson.Should().Equals(orginJson);
+            Assert.Equal(orginJson, actJson);
+           
         }
 
 
@@ -99,20 +102,21 @@ namespace Grpc.HttpApi.UnitTests
             var actualMessage2 = parser.FromJson<SubMessage>(json);
 
             //assert
-            actualMessage1.Should().NotBeNull();
-            actualMessage1.SubField.Should().Equals("Test");
-            actualMessage1.SubFields.Should().HaveCount(3);
-            actualMessage1.SubFields[0].Should().Equals("message1");
-            actualMessage1.SubFields[1].Should().Equals("message2");
-            actualMessage1.SubFields[2].Should().Equals("message3");
+            Assert.NotNull(actualMessage1);
+            Assert.Equal("Test", actualMessage1.SubField);
+            Assert.Equal(3, actualMessage1.SubFields.Count);
+            Assert.Equal("message1", actualMessage1.SubFields[0]);
+            Assert.Equal("message2", actualMessage1.SubFields[1]);
+            Assert.Equal("message3", actualMessage1.SubFields[2]);
 
 
-            actualMessage2.Should().NotBeNull();
-            actualMessage2.SubField.Should().Equals("Test");
-            actualMessage2.SubFields.Should().HaveCount(3);
-            actualMessage2.SubFields[0].Should().Equals("message1");
-            actualMessage2.SubFields[1].Should().Equals("message2");
-            actualMessage2.SubFields[2].Should().Equals("message3");
+            Assert.NotNull(actualMessage2);
+            Assert.Equal("Test", actualMessage2.SubField);
+            Assert.Equal(3, actualMessage2.SubFields.Count);
+            Assert.Equal("message1", actualMessage2.SubFields[0]);
+            Assert.Equal("message2", actualMessage2.SubFields[1]);
+            Assert.Equal("message3", actualMessage2.SubFields[2]);
+
         }
 
 
@@ -129,7 +133,9 @@ namespace Grpc.HttpApi.UnitTests
             Action action = ()=> parser.FromJson(json,typeof(TestJsonObject));
 
             //assert
-            action.Should().Throw<InvalidCastException>().WithMessage("Message is not a Protobuf Message");
+            var ex = Assert.Throws<InvalidCastException>(action);
+            Assert.Equal("Message is not a Protobuf Message", ex.Message);
+           
         }
 
 

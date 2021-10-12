@@ -6,6 +6,6 @@ namespace Grpc.HttpApi.Swagger
 {
     public interface ISwaggerProvider
     {
-        SwaggerInfo GetSwaggerInfo(string host,string basePath);
+        SwaggerInfo GetSwaggerInfo();
     }
 }

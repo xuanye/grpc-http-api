@@ -1,7 +1,6 @@
 ﻿using Google.Protobuf.Reflection;
 using Grpc.AspNetCore.Server;
 using Grpc.AspNetCore.Server.Model;
-using Grpc.HttpApi.Contracts;
 using Grpc.HttpApi.Internal;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

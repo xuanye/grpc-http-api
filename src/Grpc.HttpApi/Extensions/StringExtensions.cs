@@ -8,6 +8,24 @@ namespace System
     public static class StringExtensions
     {
         private static readonly Regex _splitNameRegex = new Regex(@"[\W_]+");
+
+        /// <summary>
+        /// Converts a string to use camelCase.
+        /// </summary>
+        /// <param name="value">The value.</param>
+        /// <returns>The to camel case. </returns>
+        public static string ToCamelCase(this string value)
+        {
+            if (string.IsNullOrEmpty(value))
+                return value;
+
+            string output = ToPascalCase(value);
+            if (output.Length > 2)
+                return char.ToLower(output[0]) + output.Substring(1);
+
+            return output.ToLower();
+        }
+
         /// <summary>
         /// Converts a string to use PascalCase.
         /// </summary>
@@ -61,6 +79,7 @@ namespace System
             return output.ToString();
         }
 
+
         /// <summary>
         /// Does string contain both uppercase and lowercase characters?
         /// </summary>
@@ -76,10 +95,10 @@ namespace System
 
             return containsLower && containsUpper;
         }
+
         public static bool IsNullOrEmpty(this string item)
         {
             return String.IsNullOrEmpty(item);
         }
-
     }
 }

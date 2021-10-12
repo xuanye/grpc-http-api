@@ -18,8 +18,5 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Swagger/UI/**/*" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Remove="Protos\error.proto" />
-  </ItemGroup>
+  </ItemGroup> 
 </Project>

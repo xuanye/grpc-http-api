@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Grpc.HttpApi.Sample
 {
+
     public class GrpcHttpApiGreeterService : HttpApiGreeterService.HttpApiGreeterServiceBase
     {
         private readonly ILogger<GrpcHttpApiGreeterService> _logger;

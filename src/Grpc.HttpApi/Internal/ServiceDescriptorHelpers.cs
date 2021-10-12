@@ -73,29 +73,60 @@ namespace Grpc.HttpApi.Internal
 
         private static object ConvertValue(object value, FieldDescriptor descriptor)
         {
+            string sNumValue="0";
+            string sBoolValue = "false";
+
+            if(descriptor.FieldType == FieldType.Double
+                || descriptor.FieldType == FieldType.Float
+                 || descriptor.FieldType == FieldType.Int64
+                 || descriptor.FieldType == FieldType.SInt64
+                 || descriptor.FieldType == FieldType.SFixed64
+                 || descriptor.FieldType == FieldType.UInt64
+                 || descriptor.FieldType == FieldType.Fixed64
+                 || descriptor.FieldType == FieldType.Int32
+                 || descriptor.FieldType == FieldType.SInt32
+                 || descriptor.FieldType == FieldType.SFixed32
+                 || descriptor.FieldType == FieldType.UInt32
+                 || descriptor.FieldType == FieldType.Fixed32
+                 || descriptor.FieldType == FieldType.Enum
+                )
+            {
+
+                sNumValue = value.ToString();
+                if (string.IsNullOrEmpty(sNumValue))
+                {
+                    sNumValue = "0";
+                }
+            }
+            else if(descriptor.FieldType == FieldType.Bool)
+            {
+                sBoolValue = value.ToString().ToLower();
+                if(sBoolValue !="true" && sBoolValue != "1")                {
+                    sBoolValue = "false";
+                }
+            }
             switch (descriptor.FieldType)
             {
-                case FieldType.Double:
-                    return Convert.ToDouble(value, CultureInfo.InvariantCulture);
-                case FieldType.Float:
-                    return Convert.ToSingle(value, CultureInfo.InvariantCulture);
+                case FieldType.Double:                   
+                    return Convert.ToDouble(sNumValue, CultureInfo.InvariantCulture);
+                case FieldType.Float:                  
+                    return Convert.ToSingle(sNumValue, CultureInfo.InvariantCulture);
                 case FieldType.Int64:
                 case FieldType.SInt64:
                 case FieldType.SFixed64:
-                    return Convert.ToInt64(value, CultureInfo.InvariantCulture);
+                    return Convert.ToInt64(sNumValue, CultureInfo.InvariantCulture);
                 case FieldType.UInt64:
                 case FieldType.Fixed64:
-                    return Convert.ToUInt64(value, CultureInfo.InvariantCulture);
+                    return Convert.ToUInt64(sNumValue, CultureInfo.InvariantCulture);
                 case FieldType.Int32:
                 case FieldType.SInt32:
                 case FieldType.SFixed32:
-                    return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                    return Convert.ToInt32(sNumValue, CultureInfo.InvariantCulture);
                 case FieldType.Bool:
-                    return Convert.ToBoolean(value, CultureInfo.InvariantCulture);
+                    return Convert.ToBoolean(sBoolValue, CultureInfo.InvariantCulture);
                 case FieldType.String:
                     return value;
-                case FieldType.Bytes:
-                    {
+                case FieldType.Bytes:                    {
                         if (value is string s)
                         {
                             return ByteString.FromBase64(s);
@@ -104,19 +135,34 @@ namespace Grpc.HttpApi.Internal
                     }
                 case FieldType.UInt32:
                 case FieldType.Fixed32:
-                    return Convert.ToUInt32(value, CultureInfo.InvariantCulture);
-                case FieldType.Enum:
-                    {
-                        if (!(value is string s))
-                            throw new InvalidOperationException("String required to convert to enum.");
-                        
-                        var enumValueDescriptor = descriptor.EnumType.FindValueByName(s);
-                        if (enumValueDescriptor == null)
+                    return Convert.ToUInt32(sNumValue, CultureInfo.InvariantCulture);
+                case FieldType.Enum:                   {
+                     
+                        EnumValueDescriptor enumValueDescriptor;
+                        if (Regex.IsMatch(sNumValue, @"\d+"))
                         {
-                            throw new InvalidOperationException($"Invalid enum value '{s}' for enum type {descriptor.EnumType.Name}.");
+                            var number = Convert.ToInt32(sNumValue);
+                            enumValueDescriptor = descriptor.EnumType.FindValueByNumber(number);
+                            if(enumValueDescriptor != null)
+                            {
+                                return number;
+                            }
+                            else
+                            {
+                                throw new InvalidOperationException($"Invalid enum value '{sNumValue}' for enum type {descriptor.EnumType.Name}.");
+                            }                            
                         }
+                        else
+                        {
+                            enumValueDescriptor = descriptor.EnumType.FindValueByName(sNumValue);
+                            if (enumValueDescriptor == null)
+                            {
+                                throw new InvalidOperationException($"Invalid enum value '{sNumValue}' for enum type {descriptor.EnumType.Name}.");
+                            }
 
-                        return enumValueDescriptor.Number;
+                            return enumValueDescriptor.Number;
+                        }
+                      
                     }
                 case FieldType.Message:
                     if (IsWrapperType(descriptor.MessageType))

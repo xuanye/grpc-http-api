@@ -18,10 +18,8 @@ namespace Microsoft.Extensions.DependencyInjection
     {
         /// <summary>
         /// Adds gRPC HTTP API services to the specified <see cref="IServiceCollection" />.
-        /// </summary>
-        /// <param name="services">The <see cref="IServiceCollection"/> for adding services.</param>
-        /// <returns>The <see cref="IServiceCollection"/> so that additional calls can be chained.</returns>
-        public static IServiceCollection AddGrpcSwagger(this IServiceCollection services)
+        /// </summary>   
+        public static IServiceCollection AddGrpcSwagger(this IServiceCollection services, Action<SwaggerOptions> configureOptions =null)
         {
             if (services == null)
             {
@@ -42,7 +40,11 @@ namespace Microsoft.Extensions.DependencyInjection
                     actionDescriptorCollectionProvider ?? new EmptyActionDescriptorCollectionProvider(),
                     apiDescriptionProvider);
             });
-            
+
+            if(configureOptions !=null)
+                services.Configure(configureOptions);
+
+            services.TryAddSingleton<ISwaggerProvider, DefaultSwaggerProvider>();
 
             return services;
         }

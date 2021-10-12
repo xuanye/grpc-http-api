@@ -32,28 +32,28 @@ namespace Grpc.HttpApi.Swagger
                 if (endpoint is RouteEndpoint routeEndpoint)
                 {
                     var grpcMetadata = endpoint.Metadata.GetMetadata<GrpcHttpMetadata>();
-
+                 
                     if (grpcMetadata != null)
-                    {
-                        var httpRule = grpcMetadata.HttpApiOption;
-                        var methodDescriptor = grpcMetadata.MethodDescriptor;
-
-                        var pattern = grpcMetadata.HttpApiOption.Path;
-                        var verb = grpcMetadata.HttpApiOption.Method.ToUpper();
-                       
-                        var apiDescription = CreateApiDescription(routeEndpoint, httpRule, methodDescriptor, pattern, verb);
+                    {                       
+                        var apiDescription = CreateApiDescription(routeEndpoint, grpcMetadata);
                         context.Results.Add(apiDescription);
                     }
                 }
             }
         }
 
-        private static ApiDescription CreateApiDescription(RouteEndpoint routeEndpoint, HttpApiOption httpRule, MethodDescriptor methodDescriptor, string pattern, string verb)
+        private static ApiDescription CreateApiDescription(RouteEndpoint routeEndpoint, GrpcHttpMetadata grpcMetadata)
         {
+           
+            var methodDescriptor = grpcMetadata.MethodDescriptor;
+            var pattern = grpcMetadata.HttpApiOption.Path;
+            var verb = grpcMetadata.HttpApiOption.Method.ToUpper();
+
             var apiDescription = new ApiDescription();
             apiDescription.HttpMethod = verb;
+            apiDescription.SetProperty(grpcMetadata);
             apiDescription.ActionDescriptor = new ActionDescriptor
-            {
+            {                   
                 DisplayName = methodDescriptor.Name,
                 RouteValues = new Dictionary<string, string>
                 {
@@ -61,8 +61,9 @@ namespace Grpc.HttpApi.Swagger
                     // Group methods together using the service name.
                     ["controller"] = methodDescriptor.Service.FullName
                 }
+                
             };
-            apiDescription.RelativePath = pattern.TrimStart('/');
+            apiDescription.RelativePath = pattern;
 
             if (!verb.Equals("get", System.StringComparison.OrdinalIgnoreCase))
             {
@@ -74,16 +75,23 @@ namespace Grpc.HttpApi.Swagger
             apiDescription.SupportedResponseTypes.Add(new ApiResponseType
             {
                 ApiResponseFormats = { new ApiResponseFormat { MediaType = "application/json" } },
+                Type = methodDescriptor.OutputType.ClrType,
                 ModelMetadata = new GrpcModelMetadata(ModelMetadataIdentity.ForType(methodDescriptor.OutputType.ClrType)),
                 StatusCode = 200
             });
 
             var routeParameters = ServiceDescriptorHelpers.ResolveRouteParameterDescriptors(routeEndpoint.RoutePattern, methodDescriptor.InputType);
 
+            HashSet<string> cache = new HashSet<string>();
             foreach (var routeParameter in routeParameters)
             {
+               
                 var field = routeParameter.Value.Last();
 
+                if (cache.Contains(field.JsonName))
+                {
+                    continue;
+                }
                 var modelMetadataIdentity = ModelMetadataIdentity.ForProperty(
                         field.ContainingType.ClrType.GetProperty(field.Name.ToPascalCase())
                       , MessageDescriptorHelpers.ResolveFieldType(field)
@@ -91,27 +99,32 @@ namespace Grpc.HttpApi.Swagger
                       );
                 apiDescription.ParameterDescriptions.Add(new ApiParameterDescription
                 {
-                    Name = routeParameter.Key,
+                    Name = field.JsonName,                     
                     ModelMetadata = new GrpcModelMetadata(modelMetadataIdentity),
                     Source = BindingSource.Path,
                     IsRequired = true,                   
                     DefaultValue = string.Empty
                 });
+
+                cache.Add(field.JsonName);
             }
             var fields = methodDescriptor.InputType.Fields.InDeclarationOrder();
-            if (verb.Equals("get", System.StringComparison.OrdinalIgnoreCase))
+            if (verb.Equals("get", StringComparison.OrdinalIgnoreCase))
             {               
                 foreach(var field in fields)
                 {
-                  
+                    if (cache.Contains(field.JsonName))
+                    {
+                        continue;
+                    }
                     var modelMetadataIdentity = ModelMetadataIdentity.ForProperty(
                           field.ContainingType.ClrType.GetProperty(field.Name.ToPascalCase())
                         , MessageDescriptorHelpers.ResolveFieldType(field)
                         , field.ContainingType.ClrType
-                        );
+                        );                 
                     apiDescription.ParameterDescriptions.Add(new ApiParameterDescription
                     {
-                        Name = field.Name,
+                        Name = field.JsonName,                    
                         ModelMetadata = new GrpcModelMetadata(modelMetadataIdentity),
                         Source = BindingSource.Query,
                         IsRequired = field.IsRequired                       
@@ -122,6 +135,11 @@ namespace Grpc.HttpApi.Swagger
             {
                 foreach (var field in fields)
                 {
+                    if (cache.Contains(field.JsonName))
+                    {
+                        continue;
+                    }
+
                     var modelMetadataIdentity = ModelMetadataIdentity.ForProperty(
                          field.ContainingType.ClrType.GetProperty(field.Name.ToPascalCase())
                        , MessageDescriptorHelpers.ResolveFieldType(field)
@@ -129,7 +147,7 @@ namespace Grpc.HttpApi.Swagger
                        );
                     apiDescription.ParameterDescriptions.Add(new ApiParameterDescription
                     {
-                        Name = field.Name,
+                        Name = field.JsonName,
                         ModelMetadata = new GrpcModelMetadata(modelMetadataIdentity),
                         Source = BindingSource.Form,
                         IsRequired = field.IsRequired

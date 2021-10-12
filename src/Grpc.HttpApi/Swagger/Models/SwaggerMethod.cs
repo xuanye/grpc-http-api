@@ -20,17 +20,17 @@ namespace Grpc.HttpApi.Swagger
         public  string OperationId { get; set; }
 
         [DataMember(Name = "consumes")]
-        public  List<string> Consumes { get; set; }
+        public List<string> Consumes { get; } = new List<string>();
 
         [DataMember(Name = "produces")]
-        public  List<string> Produces { get; set; } = new List<string> { "application/json"};
+        public  List<string> Produces { get;  } = new List<string>();
 
 
         [DataMember(Name = "parameters")]
-        public  List<SwaggerApiParameters> Parameters { get; set; }
+        public List<SwaggerApiParameters> Parameters { get; } = new List<SwaggerApiParameters>();
 
         [DataMember(Name = "responses")]
-        public Dictionary<string,SwaggerApiResponse> Responses { get; set; }
+        public Dictionary<string, SwaggerApiResponse> Responses { get; } = new Dictionary<string, SwaggerApiResponse>();
 
 
         [DataMember(Name = "version")]

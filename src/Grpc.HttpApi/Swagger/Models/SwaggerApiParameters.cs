@@ -14,6 +14,16 @@ namespace Grpc.HttpApi.Swagger
         [DataMember(Name = "description")]
         public  string Description { get; set; }
 
+        [DataMember(Name = "required")]
+        public bool Required { get; set; }
+
+        [DataMember(Name = "defaultValue")]
+        public string DefaultValue { get; set; }
+
+        [DataMember(Name = "format")]
+        public string Format { get; set; }
+
+
         [DataMember(Name = "schema")]
         public SwaggerItemSchema Schema { get; set; }
     }

@@ -5,7 +5,6 @@ option csharp_namespace = "Grpc.HttpApi.UnitTests";
 package greet;
 
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/any.proto";
 
 import public "annotations.proto";
 
@@ -14,6 +13,7 @@ import public "annotations.proto";
 // The greeting service definition.
 service HttpApiGreeterService {
 
+  //SayHello Action
   rpc SayHello (HelloRequest) returns (HelloReply){	
 	option (grpc.extensions.http_api_option) = {
 			path : "/api/greeter/{name}",
@@ -22,7 +22,7 @@ service HttpApiGreeterService {
 			
 	};
   };
-
+   //PostTest Action
   rpc PostTest (HelloRequest) returns (HelloReply){	
     option (grpc.extensions.http_api_option) = {
 		    path : "/api/greeter",
@@ -30,7 +30,7 @@ service HttpApiGreeterService {
 		    description : "post greeter hello"			
     };
   };
-  
+  //PostTest Action
   rpc NoOption (HelloRequest) returns (HelloReply);
 }
 
@@ -56,7 +56,7 @@ message HelloRequest {
       NEG = -1;  // Intentionally negative.
     }
 
-    int32 single_int32 = 1;
+    int32 single_int32 = 1; //single_int32 comment
     int64 single_int64 = 2;
     uint32 single_uint32 = 3;
     uint64 single_uint64 = 4;
@@ -73,7 +73,7 @@ message HelloRequest {
     bytes single_bytes = 15;
     NestedEnum single_enum = 16;
 
-    string name =20;
+    string name =20;//name comment
 
     SubMessage sub_message= 21;
     
@@ -85,8 +85,7 @@ message SubMessage {
 }
 // The response message containing the greetings.
 message HelloReply {
-  string message = 1;
-  repeated string values = 2;
-  google.protobuf.StringValue nullable_message = 3;
-  repeated string list_message = 10;
+  string message = 1; //message comment
+  repeated string list_message = 2; //list message comment
+  google.protobuf.StringValue nullable_message = 3;  //nullable message comment
 }

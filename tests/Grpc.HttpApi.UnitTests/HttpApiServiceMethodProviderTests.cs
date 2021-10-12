@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Grpc.AspNetCore.Server;
+﻿using Grpc.AspNetCore.Server;
 using Grpc.AspNetCore.Server.Model;
 using Grpc.HttpApi.UnitTests.TestObjects;
 using Microsoft.AspNetCore.Builder;
@@ -24,14 +23,16 @@ namespace Grpc.HttpApi.UnitTests
             // arrange & act
             var endpoints = MapEndpoints<GrpcHttpApiGreeterService>();
 
-            // assert
+           
             var endpoint = FindGrpcEndpoint(endpoints, nameof(GrpcHttpApiGreeterService.SayHello));
             var method = endpoint.Metadata.GetMetadata<IHttpMethodMetadata>().HttpMethods.Single();
-            method.Should().Be("GET");
-            endpoint.RoutePattern.RawText.Should().Be("/api/greeter/{name}");
-            endpoint.RoutePattern.Parameters.Should().ContainSingle();
 
-            endpoint.RoutePattern.Parameters[0].Name.Should().Be("name");
+            // assert
+            Assert.Equal("GET", method);
+            Assert.Equal("/api/greeter/{name}", endpoint.RoutePattern.RawText);
+            Assert.Single(endpoint.RoutePattern.Parameters);
+            Assert.Equal("name", endpoint.RoutePattern.Parameters[0].Name);
+  
         }
 
         [Fact]
@@ -39,13 +40,15 @@ namespace Grpc.HttpApi.UnitTests
         {
             // arrange & act
             var endpoints = MapEndpoints<GrpcHttpApiGreeterService>();
-
-            // assert
+           
             var endpoint = FindGrpcEndpoint(endpoints, nameof(GrpcHttpApiGreeterService.PostTest));
             var method = endpoint.Metadata.GetMetadata<IHttpMethodMetadata>().HttpMethods.Single();
-            method.Should().Be("POST");
-            endpoint.RoutePattern.RawText.Should().Be("/api/greeter");
-            endpoint.RoutePattern.Parameters.Should().BeEmpty();           
+
+            // assert
+            Assert.Equal("POST", method);
+            Assert.Equal("/api/greeter", endpoint.RoutePattern.RawText);
+            Assert.Empty(endpoint.RoutePattern.Parameters);
+    
         }
 
         [Fact]
@@ -56,7 +59,10 @@ namespace Grpc.HttpApi.UnitTests
             Action action = () => FindGrpcEndpoint(endpoints, nameof(GrpcHttpApiGreeterService.NoOption));
 
             // Assert
-            action.Should().Throw<InvalidOperationException>().WithMessage("Couldn't find gRPC endpoint for method NoOption.");
+            var exception = Assert.Throws<InvalidOperationException>(action);
+
+            Assert.Equal("Couldn't find gRPC endpoint for method NoOption.", exception.Message);
+         
         }
 
 
@@ -67,14 +73,17 @@ namespace Grpc.HttpApi.UnitTests
             Action action = () => MapEndpoints<GrpcHttpApiInvalidPatternGreeterService>();
 
             // Assert
-            action.Should()
-                .Throw<InvalidOperationException>()
-                .WithMessage("Error binding gRPC service 'GrpcHttpApiInvalidPatternGreeterService'.")
-                .WithInnerException<TargetInvocationException>() //Reflection Invoke Exception
-                .WithInnerException<InvalidOperationException>()
-                .WithMessage("Error binding BadPattern on GrpcHttpApiInvalidPatternGreeterService to HTTP API.")
-                .WithInnerException<InvalidOperationException>()
-                .WithMessage("Path template must start with /: api/greeter/{name}");      
+
+            var invalidOperationException = Assert.Throws<InvalidOperationException>(action);
+
+            Assert.Equal("Error binding gRPC service 'GrpcHttpApiInvalidPatternGreeterService'.", invalidOperationException.Message);
+            Assert.IsType<TargetInvocationException>(invalidOperationException.InnerException);
+            Assert.IsType<InvalidOperationException>(invalidOperationException.InnerException.InnerException);
+
+            Assert.Equal("Error binding BadPattern on GrpcHttpApiInvalidPatternGreeterService to HTTP API.", invalidOperationException.InnerException.InnerException.Message);
+            Assert.IsType<InvalidOperationException>(invalidOperationException.InnerException.InnerException.InnerException);
+            Assert.Equal("Path template must start with /: api/greeter/{name}", invalidOperationException.InnerException.InnerException.InnerException.Message);
+     
         }
 
         private static RouteEndpoint FindGrpcEndpoint(IReadOnlyList<Endpoint> endpoints, string methodName)

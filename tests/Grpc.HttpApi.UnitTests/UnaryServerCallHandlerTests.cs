@@ -1,5 +1,4 @@
-﻿using FluentAssertions;
-using Google.Protobuf;
+﻿using Google.Protobuf;
 using Grpc.AspNetCore.Server;
 using Grpc.AspNetCore.Server.Model;
 using Grpc.Core;
@@ -574,6 +573,68 @@ namespace Grpc.HttpApi.UnitTests
             Assert.Equal(11.1, request!.SingleFloat, 3);
             Assert.Equal(12.1, request!.SingleDouble, 3);
             Assert.True(request!.SingleBool);
+            Assert.Equal(HelloRequest.Types.NestedEnum.Foo, request!.SingleEnum);
+            Assert.Equal("A string", request!.SingleString);
+            Assert.Equal(new byte[] { 1, 2, 3 }, request!.SingleBytes.ToByteArray());
+            Assert.Equal("Nested string", request!.SubMessage.SubField);
+        }
+
+
+        [Fact]
+        public async Task HandleCallAsync_DataTypesEnumNumber_SetOnRequestMessage()
+        {
+            // Arrange
+            HelloRequest request = null;
+            UnaryServerMethod<GrpcHttpApiGreeterService, HelloRequest, HelloReply> invoker = (s, r, c) =>
+            {
+                request = r;
+                return Task.FromResult(new HelloReply());
+            };
+
+            var unaryServerCallHandler = CreateCallHandler(invoker);
+            var httpContext = CreateHttpContext();
+            httpContext.Request.Query = new QueryCollection(new Dictionary<string, StringValues>
+            {
+                ["single_int32"] = "1",
+                ["single_int64"] = "2",
+                ["single_uint32"] = "3",
+                ["single_uint64"] = "4",
+                ["single_sint32"] = "5",
+                ["single_sint64"] = "6",
+                ["single_fixed32"] = "7",
+                ["single_fixed64"] = "8",
+                ["single_sfixed32"] = "9",
+                ["single_sfixed64"] = "10",
+                ["single_float"] = "11.1",
+                ["single_double"] = "12.1",
+                ["single_bool"] = "true",
+                ["single_string"] = "A string",
+                ["single_bytes"] = Convert.ToBase64String(new byte[] { 1, 2, 3 }),
+                ["single_enum"] = "2",
+                ["sub_message.sub_field"] = "Nested string"
+            });
+
+            // Act
+            await unaryServerCallHandler.HandleCallAsync(httpContext);
+
+            // Assert
+            Assert.NotNull(request);
+            Assert.Equal(1, request!.SingleInt32);
+            Assert.Equal(2, request!.SingleInt64);
+            Assert.Equal((uint)3, request!.SingleUint32);
+            Assert.Equal((ulong)4, request!.SingleUint64);
+            Assert.Equal(5, request!.SingleSint32);
+            Assert.Equal(6, request!.SingleSint64);
+            Assert.Equal((uint)7, request!.SingleFixed32);
+            Assert.Equal((ulong)8, request!.SingleFixed64);
+            Assert.Equal(9, request!.SingleSfixed32);
+            Assert.Equal(10, request!.SingleSfixed64);
+            Assert.Equal(11.1, request!.SingleFloat, 3);
+            Assert.Equal(12.1, request!.SingleDouble, 3);
+
+            Assert.Equal(HelloRequest.Types.NestedEnum.Bar,request!.SingleEnum);
+
+            Assert.True(request!.SingleBool);
             Assert.Equal("A string", request!.SingleString);
             Assert.Equal(new byte[] { 1, 2, 3 }, request!.SingleBytes.ToByteArray());
             Assert.Equal("Nested string", request!.SubMessage.SubField);
@@ -625,9 +686,11 @@ namespace Grpc.HttpApi.UnitTests
             await unaryServerCallHandler.HandleCallAsync(httpContext);
 
             // assert
-            request.Should().NotBeNull();
-            request!.Name.Should().Equals("TestName2!");
-            request!.SubMessage.SubField.Should().Equals("TestSubfield2!");
+            Assert.NotNull(request);
+            Assert.Equal("TestName2!", request.Name);
+            Assert.NotNull(request.SubMessage);
+            Assert.Equal("TestSubfield2!", request.SubMessage.SubField);
+         
         }
 
         [Fact]
@@ -675,9 +738,9 @@ namespace Grpc.HttpApi.UnitTests
             var error = responseJson.RootElement.GetProperty("error").GetString();
             var code = responseJson.RootElement.GetProperty("code").GetInt32();
 
-            message.Should().Equals("Internal Error.");
-            error.Should().Equals("Internal Error.");
-            code.Should().Equals((int)StatusCode.Internal);
+            Assert.Equal("Internal Error.", message);
+            Assert.Equal("Internal Error.", error);
+            Assert.Equal((int)StatusCode.Internal, code);          
         }
 
         [Fact]
@@ -722,9 +785,13 @@ namespace Grpc.HttpApi.UnitTests
             await unaryServerCallHandler.HandleCallAsync(httpContext);
 
             // assert
-            request.Should().NotBeNull();
-            request!.Name.Should().Equals("TestName! With UseHttpRequestParsePostPlugin");
-            request!.SubMessage.SubField.Should().Equals("TestSubfield2! With UseHttpRequestParsePostPlugin");
+            Assert.NotNull(request);
+            Assert.Equal("TestName! With UseHttpRequestParsePostPlugin", request.Name);
+
+            Assert.NotNull(request.SubMessage);
+
+            Assert.Equal("TestSubfield! With UseHttpRequestParsePostPlugin", request.SubMessage.SubField);
+           
         }
 
         [Fact]
@@ -772,9 +839,10 @@ namespace Grpc.HttpApi.UnitTests
             var error = responseJson.RootElement.GetProperty("error").GetString();
             var code = responseJson.RootElement.GetProperty("code").GetInt32();
 
-            message.Should().Equals("Internal Error.");
-            error.Should().Equals("Internal Error.");
-            code.Should().Equals((int)StatusCode.Internal);
+          
+            Assert.Equal("Internal Error.", message);
+            Assert.Equal("Internal Error.", error);
+            Assert.Equal((int)StatusCode.Internal, code);
         }
 
 
@@ -819,8 +887,8 @@ namespace Grpc.HttpApi.UnitTests
             httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
             using var responseJson = JsonDocument.Parse(httpContext.Response.Body);
             var message = responseJson.RootElement.GetProperty("message").GetString();
-            message.Should().Equals("Test Message!  Use HttpOutputProcessPlugin");
-            
+
+            Assert.Equal("Test Message! Use HttpOutputProcessPlugin", message);          
         }
 
         [Fact]
@@ -867,7 +935,9 @@ namespace Grpc.HttpApi.UnitTests
 
             using var reader = new StreamReader(httpContext.Response.Body);
             var responseBody = reader.ReadToEnd();
-            responseBody.Should().Equals("Test Message!");
+
+            Assert.Equal("Test Message! Use HttpOutputProcessPlugin", responseBody);
+         
         }
 
         [Fact]
@@ -905,9 +975,12 @@ namespace Grpc.HttpApi.UnitTests
             var code = responseJson.RootElement.GetProperty("code").GetInt32();
 
 
-            message.Should().Equals("Exception was thrown by handler.");
-            error.Should().Equals("Internal Error.");
-            code.Should().Equals((int)StatusCode.Unknown);
+
+
+            Assert.Equal("Internal Error.", message);
+            Assert.Equal("Exception was thrown by handler.", error);
+            Assert.Equal((int)StatusCode.Unknown, code);
+  
           
         }
 
@@ -943,11 +1016,9 @@ namespace Grpc.HttpApi.UnitTests
             httpContext.Response.Body.Seek(0, SeekOrigin.Begin);
             using var reader = new StreamReader(httpContext.Response.Body);
             var responseBody = reader.ReadToEnd();
-            responseBody.Should().Equals("Exception was thrown by handler.");        
+
+            Assert.Equal("Exception was thrown by handler.", responseBody);                
         }
-
-
-
 
 
         [Fact]
@@ -990,7 +1061,7 @@ namespace Grpc.HttpApi.UnitTests
             using var reader = new StreamReader(httpContext.Response.Body);
             var responseBody = reader.ReadToEnd();
 
-            responseBody.Should().Equals("[ \"message 1\", \"message 2\", \"message 3\" ]");
+            Assert.Equal("[ \"message 1\", \"message 2\", \"message 3\" ]", responseBody); 
 
         }
 
@@ -1034,27 +1105,9 @@ namespace Grpc.HttpApi.UnitTests
 
             using var reader = new StreamReader(httpContext.Response.Body);
             var responseBody = reader.ReadToEnd();
-            responseBody.Should().Equals("Test Message! Use UseHttpApiOutputProcess");
+
+            Assert.Equal("Test Message! Use UseHttpApiOutputProcess", responseBody);
         }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
         private static DefaultHttpContext CreateHttpContext(Action<ServiceCollection> additionalServices = null, CancellationToken cancellationToken = default)

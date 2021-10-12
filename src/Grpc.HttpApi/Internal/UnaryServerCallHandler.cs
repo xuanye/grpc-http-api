@@ -158,7 +158,8 @@ namespace Grpc.HttpApi.Internal
                     var pathDescriptors = GetPathDescriptors(requestMessage, item.Key);
 
                     if (pathDescriptors != null)
-                    {
+                    {                       
+
                         object value = item.Value.Count == 1 ? (object)item.Value[0] : item.Value;
                         ServiceDescriptorHelpers.RecursiveSetValue(requestMessage, pathDescriptors, value);
                     }
@@ -166,16 +167,7 @@ namespace Grpc.HttpApi.Internal
             }
             else if (contentType.StartsWith("application/json"))
             {
-                if (!request.Body.CanSeek)
-                {
-                    // JsonParser does synchronous reads. In order to avoid blocking on the stream, we asynchronously
-                    // read everything into a buffer, and then seek back to the beginning.
-                    request.EnableBuffering();
-                    Debug.Assert(request.Body.CanSeek);
-
-                    await request.Body.DrainAsync(CancellationToken.None);
-                    request.Body.Seek(0L, SeekOrigin.Begin);
-                }
+                
                 var encoding = RequestEncoding.SelectCharacterEncoding(request);
                 // TODO: Handle unsupported encoding
 

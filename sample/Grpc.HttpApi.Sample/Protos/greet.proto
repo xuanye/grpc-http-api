@@ -6,8 +6,6 @@ package greet;
 
 
 import "google/protobuf/wrappers.proto";
-import "google/protobuf/any.proto";
-
 import public "annotations.proto";
 
 
@@ -48,7 +46,7 @@ message HelloRequest {
       NEG = -1;  // Intentionally negative.
     }
 
-    int32 single_int32 = 1; //comment single_int32
+    int32 single_int32 = 1;  //comment single_int32
     int64 single_int64 = 2;  //comment single_int64
     uint32 single_uint32 = 3;  //comment single_uint32
     uint64 single_uint64 = 4;  //comment single_uint64
@@ -74,5 +72,5 @@ message HelloReply {
   string message = 1; //comment message
   repeated string values = 2; //comment values
   google.protobuf.StringValue nullable_message = 3; //comment nullable_message
-  google.protobuf.Any any_message = 4; //comment any_message
+  repeated string list_message = 10;
 }
