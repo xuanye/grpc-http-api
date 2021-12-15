@@ -1,0 +1,8 @@
+<Project>
+	<PropertyGroup>
+		<GrpcHttpApiPackageNotes>	
+		1. Implement Grpc interface conversion layer HttpApi interface
+		2. Customize SwaggerUI	
+		</GrpcHttpApiPackageNotes> 
+	</PropertyGroup>
+</Project>

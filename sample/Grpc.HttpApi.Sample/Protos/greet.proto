@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option csharp_namespace = "Grpc.HttpApi.Sample";
+option csharp_namespace = "Grape.Grpc.HttpApi.Sample";
 
 package greet;
 

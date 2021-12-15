@@ -1,0 +1,5 @@
+<Project>
+	<PropertyGroup>
+		<GrpcHttpApiPackageVersion>1.0.0</GrpcHttpApiPackageVersion>		
+	</PropertyGroup>
+</Project>

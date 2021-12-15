@@ -5,7 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.IO;
 
-namespace Grpc.HttpApi.Sample
+namespace Grape.Grpc.HttpApi.Sample
 {
     /// <summary>
     /// startup

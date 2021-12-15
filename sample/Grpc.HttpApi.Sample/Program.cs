@@ -6,7 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Grpc.HttpApi.Sample
+namespace Grape.Grpc.HttpApi.Sample
 {
     public static class Program
     {
